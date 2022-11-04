@@ -18,9 +18,9 @@ import { Raffle } from '../target/types/raffle';
 
 const GLOBAL_AUTHORITY_SEED = "global-authority";
 
-const PROGRAM_ID = "DfpiHaschjki2b4wCwVkNSPsh9L4wvC9h15eJRPVaHh8";
+const PROGRAM_ID = "7XMibUkhWBVzAqVVzQ3hZ2mVmW15P62o9eir1NZVrhuq";
 const REAP_TOKEN_MINT = new PublicKey("AsACVnuMa5jpmfp3BjArmb2qWg5A6HBkuXePwT37RrLY");
-const RAFFLE_SIZE = 64136;
+const RAFFLE_SIZE = 66136;
 const DECIMALS = 1000000000;
 const REAP_DECIMALS = 1000000000;
 
@@ -50,15 +50,15 @@ const main = async () => {
     console.log('GlobalAuthority: ', globalAuthority.toBase58());
 
     // await initProject();
-    // await createRaffle(payer.publicKey, new PublicKey("HyomvqtLBjHhPty1P6dKzNf5gNow9qbfGkxj69pqBD8Z"), 1, 0, 1649355000, 10, 1, 100);
+    await createRaffle(payer.publicKey, new PublicKey("GF4XmpVKCf9aozU5igmr9sKNzDBkjvmiWujx8uC7Bnp4"), 1, 0, 1651148980, 10, 1, 100);
     // await updateRafflePeriod(payer.publicKey, new PublicKey("HyomvqtLBjHhPty1P6dKzNf5gNow9qbfGkxj69pqBD8Z"), 1649355012);
     // await buyTicket(payer.publicKey, new PublicKey("14njy5aKYoAvz3Ut8ojfYULhEKbBDXcXidZ3xK6jZs7U"), 10);
     // await revealWinner(payer.publicKey, new PublicKey("14njy5aKYoAvz3Ut8ojfYULhEKbBDXcXidZ3xK6jZs7U"));
     // await claimReward(payer.publicKey, new PublicKey("14njy5aKYoAvz3Ut8ojfYULhEKbBDXcXidZ3xK6jZs7U"));
-    await withdrawNft(payer.publicKey, new PublicKey("HyomvqtLBjHhPty1P6dKzNf5gNow9qbfGkxj69pqBD8Z"));
+    // await withdrawNft(payer.publicKey, new PublicKey("HyomvqtLBjHhPty1P6dKzNf5gNow9qbfGkxj69pqBD8Z"));
 
-    const pool = await getRaffleState(new PublicKey("HyomvqtLBjHhPty1P6dKzNf5gNow9qbfGkxj69pqBD8Z"));
-    console.log(pool.endTimestamp.toNumber());
+    // const pool = await getRaffleState(new PublicKey("HyomvqtLBjHhPty1P6dKzNf5gNow9qbfGkxj69pqBD8Z"));
+    // console.log(pool.endTimestamp.toNumber());
 }
 
 /**
@@ -115,22 +115,6 @@ export const createRaffle = async (
         program.programId
     );
 
-    let raffle = await PublicKey.createWithSeed(
-        userAddress,
-        nft_mint.toBase58().slice(0, 10),
-        program.programId,
-    );
-
-    let ix = SystemProgram.createAccountWithSeed({
-        fromPubkey: userAddress,
-        basePubkey: userAddress,
-        seed: nft_mint.toBase58().slice(0, 10),
-        newAccountPubkey: raffle,
-        lamports: await solConnection.getMinimumBalanceForRentExemption(RAFFLE_SIZE),
-        space: RAFFLE_SIZE,
-        programId: program.programId,
-    });
-
     let ownerNftAccount = await getAssociatedTokenAccount(userAddress, nft_mint);
 
     let ix0 = await getATokenAccountsNeedCreate(
@@ -141,13 +125,43 @@ export const createRaffle = async (
     );
     console.log("Dest NFT Account = ", ix0.destinationAccounts[0].toBase58());
 
-
     let ix1 = await getATokenAccountsNeedCreate(
         solConnection,
         userAddress,
         userAddress,
         [REAP_TOKEN_MINT]
     );
+
+    let raffle;
+    let i;
+
+    for (i = 10; i > 0; i--) {
+        raffle = await PublicKey.createWithSeed(
+            userAddress,
+            nft_mint.toBase58().slice(0, i),
+            program.programId,
+        );
+        let state = await getStateByKey(raffle);
+        if (state === null) {
+            console.log(i);
+            break;
+        }
+    }
+    console.log(i);
+    let ix = SystemProgram.createAccountWithSeed({
+        fromPubkey: userAddress,
+        basePubkey: userAddress,
+        seed: nft_mint.toBase58().slice(0, i),
+        newAccountPubkey: raffle,
+        lamports: await solConnection.getMinimumBalanceForRentExemption(RAFFLE_SIZE),
+        space: RAFFLE_SIZE,
+        programId: program.programId,
+    });
+
+    console.log(payer.publicKey.toBase58());
+    console.log(raffle.toBase58());
+    console.log(ownerNftAccount.toBase58());
+    console.log(ix0.destinationAccounts[0].toBase58());
     const tx = await program.rpc.createRaffle(
         bump,
         new anchor.BN(ticketPriceReap * REAP_DECIMALS),
@@ -205,12 +219,8 @@ export const buyTicket = async (
     // const userFlwr = await getTokenAccountBalance()
     // if (totalAmountSpl < )
 
-    let creatorTokenAccount;
-    let userTokenAccount;
-    if (raffleState.ticketPriceReap > 0) {
-        let userTokenAccount = await getAssociatedTokenAccount(userAddress, REAP_TOKEN_MINT);
-        let creatorTokenAccount = await getAssociatedTokenAccount(creator, REAP_TOKEN_MINT);
-    }
+    let userTokenAccount = await getAssociatedTokenAccount(userAddress, REAP_TOKEN_MINT);
+    let creatorTokenAccount = await getAssociatedTokenAccount(creator, REAP_TOKEN_MINT);
 
     const tx = await program.rpc.buyTickets(
         bump,
@@ -284,23 +294,43 @@ export const claimReward = async (
     );
     console.log("Claimer's NFT Account: ", ix0.destinationAccounts[0]);
 
-    const tx = await program.rpc.claimReward(
-        bump,
-        {
-            accounts: {
-                claimer: userAddress,
-                globalAuthority,
-                raffle: raffleKey,
-                claimerNftTokenAccount: ix0.destinationAccounts[0],
-                srcNftTokenAccount,
-                nftMintAddress: nft_mint,
-                tokenProgram: TOKEN_PROGRAM_ID,
-            },
-            instructions: [
-                ...ix0.instructions
-            ],
-            signers: [],
-        });
+    let tx;
+
+    if (ix0.instructions.length === 0) {
+        tx = await program.rpc.claimReward(
+            bump,
+            {
+                accounts: {
+                    claimer: userAddress,
+                    globalAuthority,
+                    raffle: raffleKey,
+                    claimerNftTokenAccount: ix0.destinationAccounts[0],
+                    srcNftTokenAccount,
+                    nftMintAddress: nft_mint,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                },
+                instructions: [],
+                signers: [],
+            });
+    } else {
+        tx = await program.rpc.claimReward(
+            bump,
+            {
+                accounts: {
+                    claimer: userAddress,
+                    globalAuthority,
+                    raffle: raffleKey,
+                    claimerNftTokenAccount: ix0.destinationAccounts[0],
+                    srcNftTokenAccount,
+                    nftMintAddress: nft_mint,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                },
+                instructions: [
+                    ...ix0.instructions
+                ],
+                signers: [],
+            });
+    }
     await solConnection.confirmTransaction(tx, "confirmed");
 
     console.log("txHash =", tx);
@@ -332,28 +362,47 @@ export const withdrawNft = async (
     );
     console.log("Creator's NFT Account: ", ix0.destinationAccounts[0]);
 
-    const tx = await program.rpc.withdrawNft(
-        bump,
-        {
-            accounts: {
-                claimer: userAddress,
-                globalAuthority,
-                raffle: raffleKey,
-                claimerNftTokenAccount: ix0.destinationAccounts[0],
-                srcNftTokenAccount,
-                nftMintAddress: nft_mint,
-                tokenProgram: TOKEN_PROGRAM_ID,
-            },
-            instructions: [
-                ...ix0.instructions
-            ],
-            signers: [],
-        });
+    let tx;
+    if (ix0.instructions.length === 0) {
+        tx = await program.rpc.withdrawNft(
+            bump,
+            {
+                accounts: {
+                    claimer: userAddress,
+                    globalAuthority,
+                    raffle: raffleKey,
+                    claimerNftTokenAccount: ix0.destinationAccounts[0],
+                    srcNftTokenAccount,
+                    nftMintAddress: nft_mint,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                },
+                signers: [],
+            });
+    } else {
+        tx = await program.rpc.withdrawNft(
+            bump,
+            {
+                accounts: {
+                    claimer: userAddress,
+                    globalAuthority,
+                    raffle: raffleKey,
+                    claimerNftTokenAccount: ix0.destinationAccounts[0],
+                    srcNftTokenAccount,
+                    nftMintAddress: nft_mint,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                },
+                instructions: [
+                    ...ix0.instructions
+                ],
+                signers: [],
+            });
+    }
     await solConnection.confirmTransaction(tx, "confirmed");
 
     console.log("txHash =", tx);
 
 }
+
 
 export const getRaffleKey = async (
     nft_mint: PublicKey
@@ -374,9 +423,19 @@ export const getRaffleKey = async (
             ]
         }
     );
-    console.log(poolAccounts);
     if (poolAccounts.length !== 0) {
-        let raffleKey = poolAccounts[0].pubkey;
+        let len = poolAccounts.length;
+        console.log(len);
+        let max = 0;
+        let maxId = 0;
+        for (let i = 0; i < len; i++) {
+            let state = await getStateByKey(poolAccounts[i].pubkey);
+            if (state.endTimestamp.toNumber() > max) {
+                max = state.endTimestamp.toNumber();
+                maxId = i;
+            }
+        }
+        let raffleKey = poolAccounts[maxId].pubkey;
         return raffleKey;
     } else {
         return null;
@@ -414,6 +473,16 @@ export const getRaffleState = async (
             return null;
         }
     } else {
+        return null;
+    }
+}
+export const getStateByKey = async (
+    raffleKey: PublicKey
+): Promise<RafflePool | null> => {
+    try {
+        let rentalState = await program.account.rafflePool.fetch(raffleKey);
+        return rentalState as RafflePool;
+    } catch {
         return null;
     }
 }

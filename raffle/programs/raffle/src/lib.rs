@@ -17,7 +17,7 @@ use constants::*;
 use error::*;
 use utils::*;
 
-declare_id!("DfpiHaschjki2b4wCwVkNSPsh9L4wvC9h15eJRPVaHh8");
+declare_id!("7XMibUkhWBVzAqVVzQ3hZ2mVmW15P62o9eir1NZVrhuq");
 
 #[program]
 pub mod raffle {
@@ -56,7 +56,7 @@ pub mod raffle {
         let mut raffle = ctx.accounts.raffle.load_init()?;
         let timestamp = Clock::get()?.unix_timestamp;
 
-        if max_entrants > 5000 {
+        if max_entrants > 2000 {
             return Err(RaffleError::MaxEntrantsTooLarge.into());
         }
         if timestamp > end_timestamp {
@@ -359,7 +359,7 @@ pub struct BuyTickets<'info> {
     pub creator_token_account: Account<'info, TokenAccount>,
 
     #[account(mut)]
-    pub user_token_account: CpiAccount<'info, TokenAccount>,
+    pub user_token_account: AccountInfo<'info>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
