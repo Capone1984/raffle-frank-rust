@@ -1,7 +1,7 @@
 use anchor_lang::{accounts::cpi_account::CpiAccount, prelude::*, AccountSerialize, System};
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{self, Token, TokenAccount, Transfer},
+    token::{self, Burn, Token, TokenAccount, Transfer},
 };
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::pubkey::Pubkey;
@@ -100,6 +100,9 @@ pub mod raffle {
     pub fn buy_tickets(ctx: Context<BuyTickets>, global_bump: u8, amount: u64) -> ProgramResult {
         let timestamp = Clock::get()?.unix_timestamp;
         let mut raffle = ctx.accounts.raffle.load_mut()?;
+        if *ctx.accounts.token_mint.key == REAP_TOKEN_MINT.parse::<Pubkey>().unwrap() {
+            return Err(RaffleError::NotREAPToken.into());
+        }
 
         if timestamp > raffle.end_timestamp {
             return Err(RaffleError::RaffleEnded.into());
@@ -133,16 +136,16 @@ pub mod raffle {
         }
 
         let src_account_info = &mut &ctx.accounts.user_token_account;
-        let dest_account_info = &mut &ctx.accounts.creator_token_account;
+        let mint_info = &mut &ctx.accounts.token_mint;
         let token_program = &mut &ctx.accounts.token_program;
 
         if total_amount_reap > 0 {
-            let cpi_accounts = Transfer {
-                from: src_account_info.to_account_info().clone(),
-                to: dest_account_info.to_account_info().clone(),
+            let cpi_accounts = Burn {
+                mint: mint_info.clone(),
+                to: src_account_info.clone(),
                 authority: ctx.accounts.buyer.to_account_info().clone(),
             };
-            token::transfer(
+            token::burn(
                 CpiContext::new(token_program.clone().to_account_info(), cpi_accounts),
                 total_amount_reap,
             )?;
@@ -352,15 +355,10 @@ pub struct BuyTickets<'info> {
     #[account(mut)]
     pub creator: AccountInfo<'info>,
 
-    #[account(
-        mut,
-        constraint = creator_token_account.owner == creator.key(),
-    )]
-    pub creator_token_account: Account<'info, TokenAccount>,
-
     #[account(mut)]
     pub user_token_account: AccountInfo<'info>,
 
+    pub token_mint: AccountInfo<'info>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }

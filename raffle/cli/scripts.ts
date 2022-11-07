@@ -215,12 +215,8 @@ export const buyTicket = async (
     console.log(raffleState);
 
     const creator = raffleState.creator;
-    // let totalAmountSpl = amount * raffleState.ticketPriceSpl;
-    // const userFlwr = await getTokenAccountBalance()
-    // if (totalAmountSpl < )
 
     let userTokenAccount = await getAssociatedTokenAccount(userAddress, REAP_TOKEN_MINT);
-    let creatorTokenAccount = await getAssociatedTokenAccount(creator, REAP_TOKEN_MINT);
 
     const tx = await program.rpc.buyTickets(
         bump,
@@ -231,7 +227,7 @@ export const buyTicket = async (
                 raffle: raffleKey,
                 globalAuthority,
                 creator,
-                creatorTokenAccount,
+                REAP_TOKEN_MINT,
                 userTokenAccount,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,
