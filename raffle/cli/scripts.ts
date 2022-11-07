@@ -18,7 +18,7 @@ import { Raffle } from '../target/types/raffle';
 
 const GLOBAL_AUTHORITY_SEED = "global-authority";
 
-const PROGRAM_ID = "7XMibUkhWBVzAqVVzQ3hZ2mVmW15P62o9eir1NZVrhuq";
+const PROGRAM_ID = "H8ewz8X1Txs4TeGJt2s59BiU1nKdAGoVDHvnAHfz2xiE";
 const REAP_TOKEN_MINT = new PublicKey("AsACVnuMa5jpmfp3BjArmb2qWg5A6HBkuXePwT37RrLY");
 const RAFFLE_SIZE = 66136;
 const DECIMALS = 1000000000;
@@ -49,8 +49,8 @@ const main = async () => {
     );
     console.log('GlobalAuthority: ', globalAuthority.toBase58());
 
-    // await initProject();
-    await createRaffle(payer.publicKey, new PublicKey("GF4XmpVKCf9aozU5igmr9sKNzDBkjvmiWujx8uC7Bnp4"), 1, 0, 1651148980, 10, 1, 100);
+    await initProject();
+    // await createRaffle(payer.publicKey, new PublicKey("GF4XmpVKCf9aozU5igmr9sKNzDBkjvmiWujx8uC7Bnp4"), 1, 0, 1651148980, 10, 1, 100);
     // await updateRafflePeriod(payer.publicKey, new PublicKey("HyomvqtLBjHhPty1P6dKzNf5gNow9qbfGkxj69pqBD8Z"), 1649355012);
     // await buyTicket(payer.publicKey, new PublicKey("14njy5aKYoAvz3Ut8ojfYULhEKbBDXcXidZ3xK6jZs7U"), 10);
     // await revealWinner(payer.publicKey, new PublicKey("14njy5aKYoAvz3Ut8ojfYULhEKbBDXcXidZ3xK6jZs7U"));
@@ -227,7 +227,7 @@ export const buyTicket = async (
                 raffle: raffleKey,
                 globalAuthority,
                 creator,
-                REAP_TOKEN_MINT,
+                tokenMint: REAP_TOKEN_MINT,
                 userTokenAccount,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 systemProgram: SystemProgram.programId,

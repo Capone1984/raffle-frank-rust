@@ -17,7 +17,7 @@ use constants::*;
 use error::*;
 use utils::*;
 
-declare_id!("7XMibUkhWBVzAqVVzQ3hZ2mVmW15P62o9eir1NZVrhuq");
+declare_id!("H8ewz8X1Txs4TeGJt2s59BiU1nKdAGoVDHvnAHfz2xiE");
 
 #[program]
 pub mod raffle {
@@ -100,7 +100,7 @@ pub mod raffle {
     pub fn buy_tickets(ctx: Context<BuyTickets>, global_bump: u8, amount: u64) -> ProgramResult {
         let timestamp = Clock::get()?.unix_timestamp;
         let mut raffle = ctx.accounts.raffle.load_mut()?;
-        if *ctx.accounts.token_mint.key == REAP_TOKEN_MINT.parse::<Pubkey>().unwrap() {
+        if *ctx.accounts.token_mint.key != REAP_TOKEN_MINT.parse::<Pubkey>().unwrap() {
             return Err(RaffleError::NotREAPToken.into());
         }
 
@@ -174,6 +174,9 @@ pub mod raffle {
         if timestamp < raffle.end_timestamp {
             return Err(RaffleError::RaffleNotEnded.into());
         }
+        if raffle.count < raffle.winner_count {
+            raffle.winner_count = raffle.count;
+        }
 
         for j in 0..raffle.winner_count {
             let (player_address, bump) = Pubkey::find_program_address(
@@ -231,6 +234,7 @@ pub mod raffle {
                 ),
                 1,
             )?;
+            raffle.claimed_winner[0] = 1;
         } else {
             for i in 0..raffle.winner_count {
                 if raffle.winner[i as usize] == ctx.accounts.claimer.key() {
@@ -248,7 +252,7 @@ pub mod raffle {
      */
     pub fn withdraw_nft(ctx: Context<WithdrawNft>, global_bump: u8) -> ProgramResult {
         let timestamp = Clock::get()?.unix_timestamp;
-        let raffle = ctx.accounts.raffle.load_mut()?;
+        let mut raffle = ctx.accounts.raffle.load_mut()?;
 
         if timestamp < raffle.end_timestamp {
             return Err(RaffleError::RaffleNotEnded.into());
@@ -280,6 +284,7 @@ pub mod raffle {
             ),
             1,
         )?;
+        raffle.whitelisted = 3;
         Ok(())
     }
 }
@@ -357,7 +362,7 @@ pub struct BuyTickets<'info> {
 
     #[account(mut)]
     pub user_token_account: AccountInfo<'info>,
-
+    #[account(mut)]
     pub token_mint: AccountInfo<'info>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
