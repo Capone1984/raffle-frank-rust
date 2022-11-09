@@ -18,13 +18,13 @@ import { Raffle } from '../target/types/raffle';
 
 const GLOBAL_AUTHORITY_SEED = "global-authority";
 
-const PROGRAM_ID = "H8ewz8X1Txs4TeGJt2s59BiU1nKdAGoVDHvnAHfz2xiE";
-const REAP_TOKEN_MINT = new PublicKey("AsACVnuMa5jpmfp3BjArmb2qWg5A6HBkuXePwT37RrLY");
+const PROGRAM_ID = "EsBdqM8dL2yH3g3t2BKKLttYnertN7sx4RsVp2Je9szi";
+const REAP_TOKEN_MINT = new PublicKey("2Dm1zu8ERJGBs3NLXt8s8Vor3YHwJye5E2pYhLiMHU4L");
 const RAFFLE_SIZE = 66136;
 const DECIMALS = 1000000000;
 const REAP_DECIMALS = 1000000000;
 
-anchor.setProvider(anchor.Provider.local(web3.clusterApiUrl('devnet')));
+anchor.setProvider(anchor.Provider.local(web3.clusterApiUrl('mainnet-beta')));
 const solConnection = anchor.getProvider().connection;
 const payer = anchor.getProvider().wallet;
 console.log(payer.publicKey.toBase58());

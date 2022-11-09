@@ -17,7 +17,7 @@ use constants::*;
 use error::*;
 use utils::*;
 
-declare_id!("H8ewz8X1Txs4TeGJt2s59BiU1nKdAGoVDHvnAHfz2xiE");
+declare_id!("EsBdqM8dL2yH3g3t2BKKLttYnertN7sx4RsVp2Je9szi");
 
 #[program]
 pub mod raffle {
