@@ -79,6 +79,6 @@ Winners can claim rewards by calling `claimReward` function.
 ```js
 claimReward(
     userAddress: PublicKey,
-    nft_mint: PublicKey
+    nft_mint: PublicKey,
 )
 ```
